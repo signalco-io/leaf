@@ -1,24 +1,25 @@
-#ifndef _SIGNAL_MQTT_H
-#define _SIGNAL_MQTT_H
+#ifndef _SIGNALCO_MQTT_H
+#define _SIGNALCO_MQTT_H
 
-#include <Arduino.h>
 #include <PubSubClient.h>
-#include "SignalBootstrapper.h"
-#include "SignalWifi.h"
-#include "SignalConfiguration.h"
+#include "SignalcoWifi.h"
+#include "SignalcoConfiguration.h"
+#include "SignalcoBootstrapper.h"
 
-class SignalMqtt
+class SignalcoMqtt
 {
 private:
     const char *subscribeTopic = "signal/";
     const char *discoveryTopic = "signal/discovery/presence/config";
     long lastReconnectAttempt;
     const int mqttReconnectDelayMs = 5000;
-    SignalConfiguration configuration;
+    SignalcoConfiguration configuration;
 
     bool mqttReconnect();
 
 public:
+    SignalcoMqtt();
+
     void setup();
     void loop();
 

@@ -1,4 +1,4 @@
-#include "SignalWifi.h"
+#include "SignalcoWifi.h"
 
 WiFiClient espClient;
 
@@ -9,7 +9,11 @@ const char *hostname;
 const char *ssid;
 const char *password;
 
-void SignalWifi::setupWifi()
+SignalcoWifi::SignalcoWifi()
+{
+}
+
+void SignalcoWifi::setupWifi()
 {
     if (!preferences.isKey("hostname") ||
         !preferences.isKey("wifissid") ||
@@ -62,7 +66,7 @@ void SignalWifi::setupWifi()
     // MDNS.begin(HOSTNAME)
 }
 
-void SignalWifi::setupOta()
+void SignalcoWifi::setupOta()
 {
     if (preferences.isKey("hostname") &&
         preferences.isKey("otapassword"))
@@ -75,7 +79,7 @@ void SignalWifi::setupOta()
         Serial.println("OTA configured");
     }
 }
-void SignalWifi::loop()
+void SignalcoWifi::loop()
 {
     if (otaConfigured > 0)
     {
@@ -83,7 +87,7 @@ void SignalWifi::loop()
     }
 }
 
-bool SignalWifi::isConfigured()
+bool SignalcoWifi::isConfigured()
 {
     return WiFi.isConnected();
 }

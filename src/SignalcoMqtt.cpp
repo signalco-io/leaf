@@ -1,8 +1,12 @@
-#include "SignalMqtt.h"
+#include "SignalcoMqtt.h"
 
 PubSubClient client(espClient);
 
-bool SignalMqtt::mqttReconnect()
+SignalcoMqtt::SignalcoMqtt()
+{
+}
+
+bool SignalcoMqtt::mqttReconnect()
 {
     // String mqttClientIdStr = preferences.getString("mqttClientId");
     // const char *mqttClientId = mqttClientIdStr.c_str();
@@ -19,7 +23,7 @@ bool SignalMqtt::mqttReconnect()
     return client.connected();
 }
 
-void SignalMqtt::loop()
+void SignalcoMqtt::loop()
 {
     if (!client.connected())
     {
@@ -42,7 +46,7 @@ void SignalMqtt::loop()
     }
 }
 
-void SignalMqtt::setup()
+void SignalcoMqtt::setup()
 {
     // if (preferences.isKey("mqttDomain") &&
     //     preferences.isKey("mqttClientId") &&
@@ -60,27 +64,27 @@ void SignalMqtt::setup()
     // }
 }
 
-void SignalMqtt::setCallback(void (*callback)(char *topic, byte *payload, unsigned int length))
+void SignalcoMqtt::setCallback(void (*callback)(char *topic, byte *payload, unsigned int length))
 {
     client.setCallback(callback);
 }
 
-void SignalMqtt::mqttPublish(const char *topic, const char *payload, boolean retained)
+void SignalcoMqtt::mqttPublish(const char *topic, const char *payload, boolean retained)
 {
     client.publish(topic, payload, retained);
 }
 
-void SignalMqtt::mqttUnsubscribe(const char *topic)
+void SignalcoMqtt::mqttUnsubscribe(const char *topic)
 {
     client.unsubscribe(topic);
 }
 
-void SignalMqtt::mqttSubscribe(const char *topic)
+void SignalcoMqtt::mqttSubscribe(const char *topic)
 {
     client.subscribe(topic);
 }
 
-boolean SignalMqtt::isOnline()
+boolean SignalcoMqtt::isOnline()
 {
     return client.connected();
 }

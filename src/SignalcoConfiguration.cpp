@@ -1,13 +1,13 @@
-#include "SignalConfiguration.h"
+#include "SignalcoConfiguration.h"
 #include <Arduino.h>
 
-SignalConfiguration::SignalConfiguration()
+SignalcoConfiguration::SignalcoConfiguration()
 {
 }
 
 String combined;
 
-const char *SignalConfiguration::getConfigurationString(const char *value)
+const char *SignalcoConfiguration::getConfigurationString(const char *value)
 {
     const char *part1 = "{\"alias\":\"Prisutnost\",\"mqttTopic\":\"presence\",\"contacts\":[{\"access\":1,\"dataType\":\"double\",\"name\":\"presence\",\"value\":";
     auto partValue = String(value);

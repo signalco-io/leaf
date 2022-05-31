@@ -1,15 +1,17 @@
-#ifndef _SIGNAL_WIFI_H
-#define _SIGNAL_WIFI_H
+#ifndef _SIGNALCO_WIFI_H
+#define _SIGNALCO_WIFI_H
 
 #include <WiFi.h>
 #include <ArduinoOTA.h>
-#include "SignalBootstrapper.h"
+#include "SignalcoBootstrapper.h"
 
 extern WiFiClient espClient;
 
-class SignalWifi
+class SignalcoWifi
 {
 public:
+    SignalcoWifi();
+
     void setupWifi();
     void setupOta();
     void loop();
