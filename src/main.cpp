@@ -8,22 +8,24 @@ WebServer server(80);
 static SignalBootstrapper *bootstraper;
 static SignalcoCounter *counter;
 
+uint8_t lastPresenceCount = 0;
+uint8_t loopCounter = 0;
+
 void handleReset()
 {
   counter->reset();
+  server.sendHeader("Location", "/");
+  server.send(307);
 }
 
 void handleRoot()
 {
-  auto presenceString = String(counter->presence);
+  auto presenceString = String(counter->presenceCount);
   auto range1 = String((counter->sensors[0]).range);
   auto range2 = String((counter->sensors[1]).range);
   server.send(200, "text/plain", presenceString + " " + range1 + " " + range2 + bootstraper->status());
 }
 
-//====================================================================
-// Setup
-//====================================================================
 void setup()
 {
   Serial.begin(115200);
@@ -39,12 +41,6 @@ void setup()
   counter->startCounter();
 }
 
-//====================================================================
-// loop
-//====================================================================
-int lastCounter = 0;
-int loopCounter = 0;
-
 void loop()
 {
   if (loopCounter++ % 8 == 0)
@@ -53,12 +49,13 @@ void loop()
     server.handleClient();
     loopCounter = 0;
   }
-  counter->processCounter();
 
-  if (lastCounter != counter->presence)
+  // Handle counter
+  counter->processCounter();
+  if (lastPresenceCount != counter->presenceCount)
   {
-    lastCounter = counter->presence;
-    auto lastCounterStr = String(lastCounter);
+    lastPresenceCount = counter->presenceCount;
+    auto lastCounterStr = String(lastPresenceCount);
     const char *payload = ("{\"contacts\":[{\"contact\":\"presence\",\"value\":" + lastCounterStr + "}]}").c_str();
     bootstraper->mqttPublish("signal/presence", payload);
   }

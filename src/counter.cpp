@@ -3,10 +3,12 @@
 void SignalcoCounter::initializeSensors()
 {
     bool found_any_sensors = false;
+
     // Set all shutdown pins low to shutdown sensors
     for (int i = 0; i < COUNT_SENSORS; i++)
         digitalWrite(sensors[i].shutdown_pin, LOW);
-    delay(10);
+
+    delay(10); // give time to shutdown
 
     for (int i = 0; i < COUNT_SENSORS; i++)
     {
@@ -24,11 +26,10 @@ void SignalcoCounter::initializeSensors()
             Serial.print(F(": failed to start\n"));
         }
     }
+
     if (!found_any_sensors)
     {
         Serial.println("No valid sensors found");
-        while (1)
-            ;
     }
 }
 
@@ -40,7 +41,7 @@ void SignalcoCounter::startContinuousRange(uint16_t cycle_time)
     Serial.println(cycle_time, DEC);
     for (uint8_t i = 0; i < COUNT_SENSORS; i++)
     {
-        sensors[i].psensor->startRangeContinuous(cycle_time); // do 100ms cycle
+        sensors[i].psensor->startRangeContinuous(cycle_time);
     }
     sensors_pending = ALL_SENSORS_PENDING;
     sensor_last_cycle_time = millis();
@@ -58,18 +59,12 @@ void SignalcoCounter::stopContinuousRange()
 
 void SignalcoCounter::processContinuousRange()
 {
-
     uint16_t mask = 1;
     for (uint8_t i = 0; i < COUNT_SENSORS; i++)
     {
-        bool range_complete = false;
         if (sensors_pending & mask)
         {
-            if (sensors[i].interrupt_pin >= 0)
-                range_complete = !digitalRead(sensors[i].interrupt_pin);
-            else
-                range_complete = sensors[i].psensor->isRangeComplete();
-            if (range_complete)
+            if (!digitalRead(sensors[i].interrupt_pin)) // TODO: Use interupts
             {
                 sensors[i].range = sensors[i].psensor->readRangeResult();
                 sensors[i].sensor_status = sensors[i].psensor->readRangeStatus();
@@ -78,6 +73,7 @@ void SignalcoCounter::processContinuousRange()
         }
         mask <<= 1; // setup to test next one
     }
+
     // See if we have all of our sensors read OK
     uint32_t delta_time = millis() - sensor_last_cycle_time;
     if (!sensors_pending || (delta_time > 1000))
@@ -100,26 +96,16 @@ void SignalcoCounter::startCounter()
     Serial.println(F("VL53LOX_multi start, initialize IO pins"));
     for (int i = 0; i < COUNT_SENSORS; i++)
     {
+        pinMode(sensors[i].interrupt_pin, INPUT_PULLUP);
         pinMode(sensors[i].shutdown_pin, OUTPUT);
-        digitalWrite(sensors[i].shutdown_pin, LOW);
-
-        if (sensors[i].interrupt_pin >= 0)
-            pinMode(sensors[i].interrupt_pin, INPUT_PULLUP);
     }
-    Serial.println(F("Starting coutner..."));
+
     initializeSensors();
 
     startContinuousRange(20);
 }
 
 ulong lastPresence = 0;
-
-uint16_t filterInvalid(uint16_t val, uint16_t min, uint16_t max, uint16_t invalidValue)
-{
-    if (val < min || val > max)
-        return invalidValue;
-    return val;
-}
 
 void SignalcoCounter::processCounter()
 {
@@ -132,7 +118,7 @@ void SignalcoCounter::processCounter()
     if (value2 < 100 || value2 > 1800)
         value2 = UINT16_MAX;
     auto sinceLast = millis() - lastPresence;
-    if (isPassing <= 0 && sinceLast > 500)
+    if (!isPassing && sinceLast > 500)
     {
         // Trigger direction
         if (value1 != UINT16_MAX || value2 != UINT16_MAX)
@@ -142,24 +128,20 @@ void SignalcoCounter::processCounter()
 
         // Wait for both values to trigger
         if (direction != 0 &&
-            value1 != UINT16_MAX && value2 != UINT16_MAX)
+            value1 != UINT16_MAX &&
+            value2 != UINT16_MAX)
         {
-            Serial.print("Passing: ");
-            Serial.print(direction);
-            Serial.println();
-
-            isPassing = 1;
-            presence += direction;
-            if (presence < 0)
-                presence = 0;
+            isPassing = true;
+            this->presenceCount += direction;
+            if (this->presenceCount < 0)
+                this->presenceCount = 0;
         }
     }
-    else if (isPassing > 0)
+    else if (isPassing)
     {
         if (value1 == UINT16_MAX && value2 == UINT16_MAX)
         {
-            Serial.println("Away");
-            isPassing = 0;
+            isPassing = false;
             direction = 0;
             lastPresence = millis();
         }
@@ -168,5 +150,5 @@ void SignalcoCounter::processCounter()
 
 void SignalcoCounter::reset()
 {
-    this->presence = 0;
+    this->presenceCount = 0;
 }

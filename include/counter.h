@@ -34,8 +34,8 @@ private:
     uint16_t sensors_pending = ALL_SENSORS_PENDING;
     uint32_t sensor_last_cycle_time;
 
-    int isPassing = 0;
-    int direction = 0;
+    bool isPassing = false;
+    int8_t direction = 0;
 
     void initializeSensors();
     void startContinuousRange(uint16_t cycle_time);
@@ -43,7 +43,7 @@ private:
     void processContinuousRange();
 
 public:
-    int16_t presence = 0;
+    uint8_t presenceCount = 0;
     sensorList_t sensors[2];
     void startCounter();
     void processCounter();
