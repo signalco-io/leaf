@@ -3,20 +3,20 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <Preferences.h>
 #include "SignalcoWifi.h"
 #include "SignalcoMqtt.h"
 #include "SignalcoServer.h"
 
-extern Preferences preferences;
-
 class SignalcoWifi;
 class SignalcoServer;
 class SignalcoMqtt;
+class SignalcoConfiguration;
 
 class SignalcoBootstrapper
 {
 public:
+    SignalcoBootstrapper();
+
     void bootstrapSetup();
     void bootstrapLoop();
     String status();
@@ -31,8 +31,8 @@ private:
     SignalcoWifi *wifi;
     SignalcoMqtt *mqtt;
     SignalcoServer *server;
+    SignalcoConfiguration *configuration;
 
-    Preferences preferences;
     String lastStatus;
 };
 

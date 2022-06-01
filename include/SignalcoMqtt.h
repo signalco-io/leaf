@@ -2,23 +2,24 @@
 #define _SIGNALCO_MQTT_H
 
 #include <PubSubClient.h>
+#include "SignalcoBootstrapper.h"
 #include "SignalcoWifi.h"
 #include "SignalcoConfiguration.h"
-#include "SignalcoBootstrapper.h"
 
 class SignalcoMqtt
 {
 private:
-    const char *subscribeTopic = "signal/";
-    const char *discoveryTopic = "signal/discovery/presence/config";
+    const char *subscribeTopic = "signal/";                          // TODO: Move to config
+    const char *discoveryTopic = "signal/discovery/presence/config"; // TODO: Move to config
     long lastReconnectAttempt;
-    const int mqttReconnectDelayMs = 5000;
-    SignalcoConfiguration configuration;
+    const int mqttReconnectDelayMs = 15000;
+    SignalcoConfiguration *configuration;
+    PubSubClient *client;
 
     bool mqttReconnect();
 
 public:
-    SignalcoMqtt();
+    SignalcoMqtt(WiFiClient &wifiClient, SignalcoConfiguration *configuration);
 
     void setup();
     void loop();

@@ -1,37 +1,21 @@
 #include "SignalcoBootstrapper.h"
 
+SignalcoBootstrapper::SignalcoBootstrapper()
+{
+    configuration = new SignalcoConfiguration();
+    wifi = new SignalcoWifi(configuration);
+    server = new SignalcoServer();
+    mqtt = new SignalcoMqtt(espClient, configuration);
+}
+
 void SignalcoBootstrapper::bootstrapSetup()
 {
     Serial.println("Bootstrapper: Initializing...");
 
-    preferences.begin("signalco");
-
-    // preferences.putString("hostname", "");
-    // preferences.putString("wifissid", "");
-    // preferences.putString("wifipassword", "");
-    // preferences.putString("otapassword", "");
-    // preferences.putString("mqttClientId", "");
-    // preferences.putString("mqttDomain", "");
-    // preferences.putUShort("mqttPort", 0);
-
-    wifi = new SignalcoWifi();
-    if (!wifi->isConfigured())
-    {
-        Serial.println("Bootstrapper: Configuring WiFi...");
-
-        wifi->setupWifi();
-    }
-
-    if (wifi->isConfigured())
-    {
-        wifi->setupOta();
-
-        server = new SignalcoServer();
-        server->setup();
-
-        mqtt = new SignalcoMqtt();
-        mqtt->setup();
-    }
+    wifi->setupWifi();
+    wifi->setupOta();
+    server->setup();
+    mqtt->setup();
 
     Serial.println("Bootstrapper: Initialized.");
 }

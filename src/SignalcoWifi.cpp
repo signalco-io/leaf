@@ -9,31 +9,19 @@ const char *hostname;
 const char *ssid;
 const char *password;
 
-SignalcoWifi::SignalcoWifi()
+SignalcoWifi::SignalcoWifi(SignalcoConfiguration *configuration)
 {
+    this->configuration = configuration;
 }
 
 void SignalcoWifi::setupWifi()
 {
-    if (!preferences.isKey("hostname") ||
-        !preferences.isKey("wifissid") ||
-        !preferences.isKey("wifipassword"))
-    {
-        Serial.println("WiFi: Configuration unavailable.");
-        return;
-    }
-
-    auto hostnameStr = preferences.getString("hostname");
-    auto ssidStr = preferences.getString("wifissid");
-    auto passwordStr = preferences.getString("wifipassword");
-    hostname = hostnameStr.c_str();
-    ssid = ssidStr.c_str();
-    password = passwordStr.c_str();
+    auto hostname = (configuration->wifi).hostname;
+    auto ssid = (configuration->wifi).ssid;
+    auto password = (configuration->wifi).password;
 
     configured = true;
     Serial.println("WiFi: Configuration available. Connecting...");
-    Serial.println("Host name: " + hostnameStr);
-    Serial.println("SSID: " + ssidStr);
 
     WiFi.setHostname(hostname);
     WiFi.setAutoReconnect(true);
@@ -68,16 +56,15 @@ void SignalcoWifi::setupWifi()
 
 void SignalcoWifi::setupOta()
 {
-    if (preferences.isKey("hostname") &&
-        preferences.isKey("otapassword"))
-    {
-        ArduinoOTA.setHostname(preferences.getString("hostname").c_str());
-        ArduinoOTA.setPassword(preferences.getString("otapassword").c_str());
-        ArduinoOTA.begin();
-        otaConfigured = 1;
+    auto hostname = (configuration->wifi).hostname;
+    auto otaPassword = (configuration->wifi).otaPassword;
 
-        Serial.println("OTA configured");
-    }
+    ArduinoOTA.setHostname(hostname);
+    ArduinoOTA.setPassword(otaPassword);
+    ArduinoOTA.begin();
+    otaConfigured = 1;
+
+    Serial.println("OTA configured");
 }
 void SignalcoWifi::loop()
 {
